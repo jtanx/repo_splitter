@@ -1,0 +1,21 @@
+name: Splitter
+on:
+  workflow_dispatch:
+    inputs:
+      repo:
+        description: The repo to split
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repo
+        run: git clone --bare ${{ github.event.inputs.repo }} repo
+      - name: Tar repo
+        run: XZ_OPT="-9e --threads=4" tar cJf - repo/ | split --bytes=1GB - repo.tar.xz.
+      - name: Upload archive
+        uses: actions/upload-artifact@v2
+        with:
+          name: repo
+          path: repo.tar.xz*
